@@ -7,12 +7,30 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services
 builder.Services.AddControllersWithViews();
 
-// Database
+// ── DATABASE ──
+var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+string connectionString;
+
+if (!string.IsNullOrEmpty(databaseUrl))
+{
+    var uri = new Uri(databaseUrl);
+    var userInfo = uri.UserInfo.Split(':');
+    var host = uri.Host;
+    var port = uri.Port > 0 ? uri.Port : 5432;
+    var database = uri.AbsolutePath.TrimStart('/');
+    var username = userInfo[0];
+    var password = userInfo.Length > 1 ? userInfo[1] : "";
+    connectionString = $"Host={host};Port={port};Database={database};Username={username};Password={password};SSL Mode=Require;Trust Server Certificate=true";
+}
+else
+{
+    connectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
+}
+
 builder.Services.AddDbContext<GradBookDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(connectionString));
 
 // Application Services
 builder.Services.AddScoped<IMessageService, MessageService>();
@@ -29,10 +47,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.ExpireTimeSpan = TimeSpan.FromHours(8);
     });
 
-// SignalR
 builder.Services.AddSignalR();
 
-// Session
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
@@ -44,7 +60,6 @@ builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
-// Middleware
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -58,34 +73,16 @@ app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Map SignalR hub
 app.MapHub<MessageHub>("/messageHub");
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-// Apply migrations and seed data
+// ── CREATE DB ──
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<GradBookDbContext>();
-    var env = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
-
-    // In Development: recreate DB if tables are missing (fixes migration mismatch)
-    if (env.IsDevelopment())
-    {
-        try
-        {
-            // Check if Visitors table exists — if not, recreate everything
-            db.Database.ExecuteSqlRaw("SELECT TOP 1 Id FROM Visitors");
-        }
-        catch
-        {
-            // Tables missing — drop and recreate cleanly
-            db.Database.EnsureDeleted();
-        }
-    }
-
     db.Database.EnsureCreated();
 }
 
