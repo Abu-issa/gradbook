@@ -10,28 +10,35 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 // ── DATABASE ──
-// ── DATABASE ──
+
 var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
 string connectionString;
 
 if (!string.IsNullOrEmpty(databaseUrl))
 {
-    // Railway يعطي الرابط بصيغة postgresql:// 
-    // مكتبة Npgsql تتوقع postgres:// أو تنسيق Key=Value
-    // هذا السطر سيقوم بتحويل الرابط للصيغة الصحيحة
-    connectionString = databaseUrl.Replace("postgresql://", "postgres://");
+    var databaseUri = new Uri(databaseUrl);
+    var userInfo = databaseUri.UserInfo.Split(':');
 
-    // ملاحظة اختيارية: إذا استمر الخطأ، يفضل إضافة SSL Mode
-    if (!connectionString.Contains("SSL Mode"))
+    var builder_conn = new Npgsql.NpgsqlConnectionStringBuilder
     {
-        connectionString += ";SSL Mode=Require;Trust Server Certificate=true";
-    }
+        Host = databaseUri.Host,
+        Port = databaseUri.Port,
+        Username = userInfo[0],
+        Password = userInfo[1],
+        Database = databaseUri.LocalPath.TrimStart('/'),
+        SslMode = Npgsql.SslMode.Require,
+        TrustServerCertificate = true 
+    };
+
+    connectionString = builder_conn.ToString();
 }
 else
 {
     connectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
 }
 
+builder.Services.AddDbContext<GradBookDbContext>(options =>
+    options.UseNpgsql(connectionString));
 builder.Services.AddDbContext<GradBookDbContext>(options =>
     options.UseNpgsql(connectionString));
 // Application Services
