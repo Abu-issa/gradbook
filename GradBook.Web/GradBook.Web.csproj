@@ -19,7 +19,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="2.2.0" />
     <PackageReference Include="QRCoder" Version="1.4.3" />
-    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.3" />
+    
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GradBook.Application\GradBook.Application.csproj" />
