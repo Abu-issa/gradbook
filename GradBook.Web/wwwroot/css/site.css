@@ -659,9 +659,12 @@ body {
 }
 
 .message-img {
-  width: 100%; border-radius: var(--radius-sm);
-  max-height: 150px; object-fit: cover;
-  margin-bottom: 1rem;
+    width: 100%;
+    border-radius: var(--radius-sm);
+    max-height: 300px;
+    object-fit: contain;
+    background: var(--black-5);
+    margin-bottom: 1rem;
 }
 /* خلفية الدفتر لصفحة الـ Message Wall */
 .page-hero.mini-hero {
@@ -764,9 +767,13 @@ body {
 .wall-image-wrap { margin-bottom: 1rem; }
 
 .wall-img {
-  width: 100%; border-radius: var(--radius-sm);
-  max-height: 180px; object-fit: cover;
-  cursor: pointer; transition: opacity 0.3s;
+    width: 100%;
+    border-radius: var(--radius-sm);
+    max-height: 400px;
+    object-fit: contain;
+    background: var(--black-5);
+    cursor: pointer;
+    transition: opacity 0.3s;
 }
 
 .wall-img:hover { opacity: 0.85; }
