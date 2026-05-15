@@ -17,7 +17,7 @@
 | 📱 **Fully Responsive** | Desktop, tablet, and mobile-ready |
 | 🔗 **Share** | WhatsApp, Facebook, and copy-link share buttons |
 | 📷 **Image Uploads** | Visitors can attach photos to messages |
-| 🔳 **QR Code** | Auto-generated QR code for printing on graduation tables |
+
 
 ---
 
@@ -216,6 +216,6 @@ Upload a photo and set `MainImageUrl` in the database, or add an admin endpoint 
 
 ## 📄 License
 
-Built with ❤️ for **Eng. Mohammed Abu-Issa** — Class of 2025.
+Built with ❤️ for **Eng. Mohammed Abu-Issa** — Class of 2026.
 
 > *"Every great journey begins with a single step. Yours led here — to this proud moment. Now, the world awaits."*
