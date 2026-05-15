@@ -4,44 +4,34 @@ using GradBook.Infrastructure.Services;
 using GradBook.Web.Hubs;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
 
 // ── DATABASE ──
-
 var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
 string connectionString;
 
 if (!string.IsNullOrEmpty(databaseUrl))
 {
-    var databaseUri = new Uri(databaseUrl);
-    var userInfo = databaseUri.UserInfo.Split(':');
+    // تغيير الاسم إلى connBuilder لتجنب التعارض مع builder الخاص بالتطبيق
+    var connBuilder = new NpgsqlConnectionStringBuilder(databaseUrl);
 
-    var builder_conn = new Npgsql.NpgsqlConnectionStringBuilder
-    {
-        Host = databaseUri.Host,
-        Port = databaseUri.Port,
-        Username = userInfo[0],
-        Password = userInfo[1],
-        Database = databaseUri.LocalPath.TrimStart('/'),
-        SslMode = Npgsql.SslMode.Require,
-        TrustServerCertificate = true 
-    };
+    connBuilder.SslMode = SslMode.Require;
+    connBuilder.TrustServerCertificate = true;
 
-    connectionString = builder_conn.ToString();
+    connectionString = connBuilder.ToString();
 }
 else
 {
+    // هنا نستخدم builder الخاص بالتطبيق (الموجود مسبقاً)
     connectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
 }
 
 builder.Services.AddDbContext<GradBookDbContext>(options =>
     options.UseNpgsql(connectionString));
-builder.Services.AddDbContext<GradBookDbContext>(options =>
-    options.UseNpgsql(connectionString));
-// Application Services
 builder.Services.AddScoped<IMessageService, MessageService>();
 builder.Services.AddScoped<IMemoryService, MemoryService>();
 builder.Services.AddScoped<IVisitorService, VisitorService>();
