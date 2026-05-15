@@ -16,20 +16,25 @@ string connectionString;
 
 if (!string.IsNullOrEmpty(databaseUrl))
 {
-    // تغيير الاسم إلى connBuilder لتجنب التعارض مع builder الخاص بالتطبيق
-    var connBuilder = new NpgsqlConnectionStringBuilder(databaseUrl);
+    // تحويل PostgreSQL URI إلى connection string
+    var uri = new Uri(databaseUrl);
+    var userInfo = uri.UserInfo.Split(':');
 
-    connBuilder.SslMode = SslMode.Require;
-    connBuilder.TrustServerCertificate = true;
-
-    connectionString = connBuilder.ToString();
+    connectionString = new NpgsqlConnectionStringBuilder
+    {
+        Host = uri.Host,
+        Port = uri.Port,
+        Database = uri.AbsolutePath.TrimStart('/'),
+        Username = userInfo[0],
+        Password = userInfo[1],
+        SslMode = SslMode.Require,
+        TrustServerCertificate = true
+    }.ToString();
 }
 else
 {
-    // هنا نستخدم builder الخاص بالتطبيق (الموجود مسبقاً)
     connectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
 }
-
 builder.Services.AddDbContext<GradBookDbContext>(options =>
     options.UseNpgsql(connectionString));
 builder.Services.AddScoped<IMessageService, MessageService>();
