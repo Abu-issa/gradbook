@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  gradbook-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=GradBookDb;User Id=sa;Password=GradBook@2025!;TrustServerCertificate=True;
+      - AdminCredentials__Username=admin
+      - AdminCredentials__Password=GradBook@2025!
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    volumes:
+      - uploads_data:/app/wwwroot/uploads
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=GradBook@2025!
+      - MSSQL_PID=Express
+    ports:
+      - "1433:1433"
+    healthcheck:
+      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "GradBook@2025!" -Q "SELECT 1" -b -o /dev/null
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+
+volumes:
+  sqlserver_data:
+  uploads_data:

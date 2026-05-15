@@ -1,0 +1,136 @@
+@model AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "_AdminLayout";
+}
+
+<!-- Stats Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card stat-gold">
+            <div class="stat-icon"><i class="fas fa-envelope"></i></div>
+            <div class="stat-info">
+                <div class="stat-value">@Model.TotalMessages</div>
+                <div class="stat-label">Total Messages</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card stat-orange">
+            <div class="stat-icon"><i class="fas fa-clock"></i></div>
+            <div class="stat-info">
+                <div class="stat-value">@Model.PendingMessages</div>
+                <div class="stat-label">Pending Approval</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card stat-blue">
+            <div class="stat-icon"><i class="fas fa-users"></i></div>
+            <div class="stat-info">
+                <div class="stat-value">@Model.TotalVisitors</div>
+                <div class="stat-label">Total Visitors</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card stat-green">
+            <div class="stat-icon"><i class="fas fa-images"></i></div>
+            <div class="stat-info">
+                <div class="stat-value">@Model.TotalMemories</div>
+                <div class="stat-label">Memories</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Pending Messages -->
+    <div class="col-lg-8">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h5><i class="fas fa-clock me-2 text-warning"></i> Pending Approval</h5>
+                <a asp-action="Messages" class="btn btn-sm btn-outline-gold">View All</a>
+            </div>
+            @if (!Model.PendingMessagesList.Any())
+            {
+                <div class="empty-admin text-center py-4">
+                    <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                    <p class="mb-0">No pending messages. All caught up!</p>
+                </div>
+            }
+            else
+            {
+                <div class="pending-list">
+                    @foreach (var msg in Model.PendingMessagesList.Take(5))
+                    {
+                        <div class="pending-item">
+                            <div class="pending-reaction">@msg.ReactionType</div>
+                            <div class="pending-body">
+                                <div class="pending-sender">@msg.SenderName</div>
+                                <div class="pending-content">@(msg.Content.Length > 100 ? msg.Content[..100] + "..." : msg.Content)</div>
+                                <div class="pending-date">@msg.CreatedAt.ToString("MMM dd, yyyy HH:mm")</div>
+                            </div>
+                            <div class="pending-actions">
+                                <form asp-action="ApproveMessage" method="post" class="d-inline">
+                                    <input type="hidden" name="id" value="@msg.Id">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-success" title="Approve">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                </form>
+                                <form asp-action="DeleteMessage" method="post" class="d-inline">
+                                    <input type="hidden" name="id" value="@msg.Id">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-danger" title="Delete"
+                                            onclick="return confirm('Delete this message?')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Quick Actions & Info -->
+    <div class="col-lg-4">
+        <div class="admin-card mb-4">
+            <div class="admin-card-header">
+                <h5><i class="fas fa-bolt me-2 text-gold"></i> Quick Actions</h5>
+            </div>
+            <div class="quick-actions">
+                <a asp-action="Messages" class="quick-action-btn">
+                    <i class="fas fa-envelope-open"></i>
+                    <span>Manage Messages</span>
+                </a>
+                <a asp-action="Memories" class="quick-action-btn">
+                    <i class="fas fa-images"></i>
+                    <span>Manage Memories</span>
+                </a>
+                <a asp-action="CreateMemory" class="quick-action-btn">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Add Memory</span>
+                </a>
+                <a asp-action="QrCode" class="quick-action-btn">
+                    <i class="fas fa-qrcode"></i>
+                    <span>QR Code</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h5><i class="fas fa-chart-bar me-2 text-gold"></i> Today</h5>
+            </div>
+            <div class="today-stats">
+                <div class="today-stat">
+                    <i class="fas fa-user-plus text-gold"></i>
+                    <span>@Model.TodayVisitors visitors today</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

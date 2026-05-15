@@ -1,0 +1,153 @@
+@model CreateMessageViewModel
+@{
+    ViewData["Title"] = "Write a Message";
+}
+
+<section class="page-hero mini-hero">
+    <div class="container text-center">
+        <div class="mini-hero-icon" data-aos="zoom-in">✍️</div>
+        <h1 class="page-title" data-aos="fade-up" data-aos-delay="100">Write Your Message</h1>
+        <p class="page-subtitle" data-aos="fade-up" data-aos-delay="200">
+            Share your heartfelt congratulations with <strong>Eng. Mohammed Abu-Issa</strong>
+        </p>
+    </div>
+</section>
+
+<section class="message-form-section py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="form-card" data-aos="fade-up">
+                    <div class="form-card-header">
+                        <h3>Your Message</h3>
+                        <p>Your message will be reviewed before being published on the wall.</p>
+                    </div>
+
+                    <form asp-action="Create" method="post" enctype="multipart/form-data" id="messageForm">
+                        @Html.AntiForgeryToken()
+
+                        <div class="mb-4">
+                            <label asp-for="SenderName" class="form-label-custom">
+                                <i class="fas fa-user me-2 text-gold"></i> Your Name
+                            </label>
+                            <input asp-for="SenderName" class="form-control-custom" placeholder="Enter your full name" />
+                            <span asp-validation-for="SenderName" class="validation-msg"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Content" class="form-label-custom">
+                                <i class="fas fa-heart me-2 text-gold"></i> Your Message
+                            </label>
+                            <textarea asp-for="Content" class="form-control-custom form-textarea" rows="5"
+                                      placeholder="Write your congratulations, memories, or wishes here..."
+                                      id="messageContent"></textarea>
+                            <div class="char-counter">
+                                <span id="charCount">0</span> / 2000 characters
+                            </div>
+                            <span asp-validation-for="Content" class="validation-msg"></span>
+                        </div>
+
+                        <!-- Reaction Picker -->
+                        <div class="mb-4">
+                            <label class="form-label-custom">
+                                <i class="fas fa-smile me-2 text-gold"></i> Choose a Reaction
+                            </label>
+                            <div class="reaction-picker">
+                                @foreach (var emoji in new[] { "🎓", "🏆", "⭐", "🌟", "💛", "🎉", "👏", "💪", "🔥", "❤️" })
+                                {
+                                    <label class="reaction-option">
+                                        <input type="radio" asp-for="ReactionType" value="@emoji" class="reaction-radio">
+                                        <span class="reaction-emoji">@emoji</span>
+                                    </label>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Image Upload -->
+                        <div class="mb-4">
+                            <label asp-for="Image" class="form-label-custom">
+                                <i class="fas fa-image me-2 text-gold"></i> Attach a Photo (Optional)
+                            </label>
+                            <div class="file-upload-area" id="fileUploadArea">
+                                <input asp-for="Image" type="file" accept="image/*" class="file-input" id="imageInput" onchange="previewImage(this)">
+                                <div class="file-upload-content" id="uploadContent">
+                                    <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                                    <p>Drag & drop or <span class="text-gold">browse</span> to upload</p>
+                                    <small>PNG, JPG, GIF, WEBP up to 5MB</small>
+                                </div>
+                                <div id="imagePreviewWrap" class="d-none">
+                                    <img id="imagePreview" src="" alt="Preview" class="img-preview">
+                                    <button type="button" class="btn-remove-img" onclick="removeImage()">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-footer">
+                            <a asp-controller="Messages" asp-action="Index" class="btn btn-ghost">
+                                <i class="fas fa-arrow-left me-2"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-gold btn-submit" id="submitBtn">
+                                <i class="fas fa-paper-plane me-2"></i>
+                                Send Message
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Char counter
+        const textarea = document.getElementById('messageContent');
+        const counter = document.getElementById('charCount');
+        textarea.addEventListener('input', () => {
+            counter.textContent = textarea.value.length;
+        });
+
+        // Image preview
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    document.getElementById('imagePreview').src = e.target.result;
+                    document.getElementById('uploadContent').classList.add('d-none');
+                    document.getElementById('imagePreviewWrap').classList.remove('d-none');
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function removeImage() {
+            document.getElementById('imageInput').value = '';
+            document.getElementById('uploadContent').classList.remove('d-none');
+            document.getElementById('imagePreviewWrap').classList.add('d-none');
+        }
+
+        // Drag & drop
+        const dropArea = document.getElementById('fileUploadArea');
+        dropArea.addEventListener('dragover', e => { e.preventDefault(); dropArea.classList.add('drag-over'); });
+        dropArea.addEventListener('dragleave', () => dropArea.classList.remove('drag-over'));
+        dropArea.addEventListener('drop', e => {
+            e.preventDefault();
+            dropArea.classList.remove('drag-over');
+            const files = e.dataTransfer.files;
+            if (files.length) {
+                document.getElementById('imageInput').files = files;
+                previewImage(document.getElementById('imageInput'));
+            }
+        });
+
+        // Submit loading state
+        document.getElementById('messageForm').addEventListener('submit', function() {
+            const btn = document.getElementById('submitBtn');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Sending...';
+            btn.disabled = true;
+        });
+    </script>
+}

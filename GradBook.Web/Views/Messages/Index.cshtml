@@ -1,0 +1,137 @@
+@model MessageWallViewModel
+@{
+    ViewData["Title"] = "Message Wall";
+}
+
+<section class="page-hero mini-hero">
+    <img src="~/newfolder/img_1907.png" class="hero-bg">
+    <div class="container text-center">
+        <div class="mini-hero-icon" data-aos="zoom-in">💌</div>
+
+        <h1 class="page-title"
+            data-aos="fade-up"
+            data-aos-delay="100">
+            Message Wall
+        </h1>
+
+        <p class="page-subtitle"
+           data-aos="fade-up"
+           data-aos-delay="200">
+            More than messages — a timeless collection of memories, pride, and heartfelt wishes.
+        </p>
+
+        <a asp-controller="Messages"
+           asp-action="Create"
+           class="btn btn-gold mt-3"
+           data-aos="fade-up"
+           data-aos-delay="300">
+
+            <i class="fas fa-pen-nib me-2"></i>
+            Add Your Message
+        </a>
+    </div>
+    </div>
+</section>
+
+<section class="message-wall-section py-5">
+    <div class="container">
+        <!-- Live indicator -->
+        <div class="live-indicator mb-4" data-aos="fade-up">
+            <span class="live-dot"></span>
+            <span>Live — new messages appear automatically</span>
+            <span class="badge-count ms-2">@Model.Messages.Count() messages</span>
+        </div>
+
+        @if (!Model.Messages.Any())
+        {
+            <div class="empty-state text-center py-5" data-aos="fade-up">
+                <div class="empty-icon">✉️</div>
+                <h3>Be the First!</h3>
+                <p>No messages yet. Be the first to congratulate Eng. Mohammed Abu-Issa.</p>
+                <a asp-controller="Messages" asp-action="Create" class="btn btn-gold mt-3">
+                    Write First Message
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="messages-wall-grid" id="messageWall">
+                @foreach (var message in Model.Messages)
+                {
+                    <div class="wall-card" data-aos="fade-up" data-aos-delay="@(Model.Messages.ToList().IndexOf(message) % 6 * 80)">
+                        <div class="wall-card-inner">
+                            <div class="wall-reaction">@message.ReactionType</div>
+                            <blockquote class="wall-content">"@message.Content"</blockquote>
+                            @if (!string.IsNullOrEmpty(message.ImageUrl))
+                            {
+                                <div class="wall-image-wrap">
+                                    <img src="@message.ImageUrl" alt="Photo from @message.SenderName" class="wall-img" onclick="openLightbox(this.src)">
+                                </div>
+                            }
+                            <div class="wall-footer">
+                                <div class="wall-sender">
+                                    <div class="sender-avatar-lg">@message.SenderName[0].ToString().ToUpper()</div>
+                                    <div>
+                                        <div class="sender-name">@message.SenderName</div>
+                                        <div class="sender-date">@message.CreatedAt.ToString("MMMM dd, yyyy")</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</section>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+    <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+    <img id="lightboxImg" src="" alt="">
+</div>
+
+@section Scripts {
+    <script>
+        // SignalR real-time
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/messageHub")
+            .withAutomaticReconnect()
+            .build();
+
+        connection.on("ReceiveMessage", function(senderName, content, reactionType, imageUrl, createdAt) {
+            const wall = document.getElementById('messageWall');
+            const card = document.createElement('div');
+            card.className = 'wall-card new-message-animate';
+            card.innerHTML = `
+                <div class="wall-card-inner">
+                    <div class="wall-reaction">${reactionType}</div>
+                    <blockquote class="wall-content">"${content}"</blockquote>
+                    ${imageUrl ? `<div class="wall-image-wrap"><img src="${imageUrl}" class="wall-img"></div>` : ''}
+                    <div class="wall-footer">
+                        <div class="wall-sender">
+                            <div class="sender-avatar-lg">${senderName[0].toUpperCase()}</div>
+                            <div>
+                                <div class="sender-name">${senderName}</div>
+                                <div class="sender-date">${createdAt}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            wall.prepend(card);
+
+            // Toast notification
+            showToast(`New message from ${senderName}! 🎓`);
+        });
+
+        connection.start().catch(err => console.error(err.toString()));
+
+        function openLightbox(src) {
+            document.getElementById('lightboxImg').src = src;
+            document.getElementById('lightbox').classList.add('active');
+        }
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.remove('active');
+        }
+    </script>
+}

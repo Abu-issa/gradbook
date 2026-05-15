@@ -1,0 +1,94 @@
+@model MemoriesViewModel
+@{
+    ViewData["Title"] = "Memories Gallery";
+}
+
+<section class="page-hero mini-hero">
+    <div class="container text-center">
+        <div class="mini-hero-icon" data-aos="zoom-in">📸</div>
+        <h1 class="page-title" data-aos="fade-up" data-aos-delay="100">Memories Gallery</h1>
+        <p class="page-subtitle" data-aos="fade-up" data-aos-delay="200">
+            A collection of moments that shaped the journey
+        </p>
+    </div>
+</section>
+
+<section class="gallery-section py-5">
+    <div class="container">
+        @if (!Model.Memories.Any())
+        {
+            <div class="empty-state text-center py-5" data-aos="fade-up">
+                <div class="empty-icon">📷</div>
+                <h3>Gallery Coming Soon</h3>
+                <p>Beautiful memories will be added here soon.</p>
+                <a asp-controller="Home" asp-action="Index" class="btn btn-gold mt-3">Back to Home</a>
+            </div>
+        }
+        else
+        {
+            <div class="gallery-masonry" id="galleryGrid">
+                @foreach (var memory in Model.Memories)
+                {
+                    <div class="gallery-item" data-aos="fade-up" data-aos-delay="@(Model.Memories.ToList().IndexOf(memory) % 4 * 100)">
+                        <div class="gallery-card">
+                            @if (!string.IsNullOrEmpty(memory.ImageUrl))
+                            {
+                                <div class="gallery-img-wrap" onclick="openLightbox('@memory.ImageUrl', '@memory.Title', '@memory.Description')">
+                                    <img src="@memory.ImageUrl" alt="@memory.Title" class="gallery-img" loading="lazy">
+                                    <div class="gallery-overlay">
+                                        <i class="fas fa-expand text-gold"></i>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="gallery-img-placeholder">
+                                    <i class="fas fa-image fa-3x text-gold"></i>
+                                </div>
+                            }
+                            <div class="gallery-info">
+                                <h5 class="gallery-title">@memory.Title</h5>
+                                @if (!string.IsNullOrEmpty(memory.Description))
+                                {
+                                    <p class="gallery-desc">@memory.Description</p>
+                                }
+                                <span class="gallery-date">@memory.CreatedAt.ToString("MMMM yyyy")</span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</section>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+    <div class="lightbox-inner" onclick="event.stopPropagation()">
+        <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+        <img id="lightboxImg" src="" alt="">
+        <div class="lightbox-caption">
+            <h4 id="lightboxTitle"></h4>
+            <p id="lightboxDesc"></p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function openLightbox(src, title, desc) {
+            document.getElementById('lightboxImg').src = src;
+            document.getElementById('lightboxTitle').textContent = title || '';
+            document.getElementById('lightboxDesc').textContent = desc || '';
+            document.getElementById('lightbox').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeLightbox();
+        });
+    </script>
+}

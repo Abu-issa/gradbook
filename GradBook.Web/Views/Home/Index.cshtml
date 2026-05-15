@@ -1,0 +1,296 @@
+﻿@model HomeViewModel
+@{
+    ViewData["Title"] = "Home";
+}
+
+<!-- HERO SECTION -->
+<section class="hero-section" id="hero">
+    <div class="hero-overlay"></div>
+
+    <!-- Floating orbs -->
+    <div class="hero-orb orb-1"></div>
+    <div class="hero-orb orb-2"></div>
+    <div class="hero-orb orb-3"></div>
+
+    <div class="container hero-content">
+        <div class="row align-items-center min-vh-100">
+            <div class="col-lg-6 hero-text-col" data-aos="fade-right" data-aos-duration="1200">
+                <div class="hero-eyebrow">
+                    <span class="eyebrow-line"></span>
+                    <span class="eyebrow-text">Class of 2025</span>
+                    <span class="eyebrow-line"></span>
+                </div>
+
+                <h1 class="hero-title">
+                    <span class="title-line-1">Congratulations</span>
+                    <span class="title-line-2">
+                        <em>Eng. Mohammed</em>
+                    </span>
+                    <span class="title-line-3">Abu-Issa</span>
+                </h1>
+
+                <p class="hero-subtitle">@(Model.Graduate?.Title ?? "Bachelor of Engineering")</p>
+
+                <p class="hero-bio">
+                    @(Model.Graduate?.Bio ?? "A journey of dedication, perseverance, and passion. Today marks the beginning of a new chapter.")
+                </p>
+
+                <div class="hero-actions">
+                    <a asp-controller="Messages" asp-action="Create" class="btn btn-gold btn-hero">
+                        <i class="fas fa-pen-nib me-2"></i>
+                        Write a Message
+                    </a>
+                    <a asp-controller="Messages" asp-action="Index" class="btn btn-ghost btn-hero">
+                        <i class="fas fa-heart me-2"></i>
+                        View Messages
+                    </a>
+                </div>
+
+                <!-- Stats -->
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <span class="stat-number" data-target="@Model.TotalMessages">0</span>
+                        <span class="stat-label">Messages</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item">
+                        <span class="stat-number" data-target="@Model.TotalVisitors">0</span>
+                        <span class="stat-label">Visitors</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item">
+                        <span class="stat-number" data-target="@Model.RecentMemories.Count()">0</span>
+                        <span class="stat-label">Memories</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6 hero-image-col text-center" data-aos="fade-left" data-aos-duration="1200" data-aos-delay="200">
+                <div class="graduate-frame">
+                    <div class="frame-ring frame-ring-outer"></div>
+                    <div class="frame-ring frame-ring-middle"></div>
+                    <div class="graduate-photo-container">
+                        @if (!string.IsNullOrEmpty(Model.Graduate?.MainImageUrl))
+                        {
+                            <img src="~/newfolder/mohammad.jpg" alt="Eng. Mohammed Abu-Issa" class="graduate-photo">
+                        }
+                        else 
+                        {
+                            <div class="graduate-photo-placeholder">
+                                <div class="placeholder-cap">&#127891;</div>
+                                <div class="placeholder-initials">MA</div>
+                            </div>
+                        }
+                    </div>
+                    <!-- Floating badges -->
+                    <div class="floating-badge badge-cap">&#127891;</div>   
+                    <div class="floating-badge badge-star">&#127942;</div>
+                    <div class="floating-badge badge-heart">&#10084;&#65039;</div>
+                </div>
+
+                <!-- Graduation date -->
+                <div class="graduation-date-badge" data-aos="zoom-in" data-aos-delay="600">
+                    <div class="gd-label">Graduation Day</div>
+                    <div class="gd-date">Jul 2026</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scroll indicator -->
+    <div class="scroll-indicator">
+        <div class="scroll-line"></div>
+        <span>Scroll</span>
+    </div>
+</section>
+
+<!-- COUNTDOWN SECTION -->
+<section class="countdown-section py-5">
+    <div class="container">
+        <div class="countdown-card" data-aos="zoom-in">
+            <div class="countdown-header">
+                <i class="fas fa-graduation-cap me-2 text-gold"></i>
+                The Countdown to a Once-in-a-Lifetime Achievement”
+            </div>
+            <div class="countdown-wrapper" id="countdown">
+                <div class="countdown-unit">
+                    <div class="countdown-number" id="days">00</div>
+                    <div class="countdown-label">Days</div>
+                </div>
+                <div class="countdown-colon">:</div>
+                <div class="countdown-unit">
+                    <div class="countdown-number" id="hours">00</div>
+                    <div class="countdown-label">Hours</div>
+                </div>
+                <div class="countdown-colon">:</div>
+                <div class="countdown-unit">
+                    <div class="countdown-number" id="minutes">00</div>
+                    <div class="countdown-label">Minutes</div>
+                </div>
+                <div class="countdown-colon">:</div>
+                <div class="countdown-unit">
+                    <div class="countdown-number" id="seconds">00</div>
+                    <div class="countdown-label">Seconds</div>
+                </div>
+            </div>
+            <div id="countdownMessage" class="countdown-complete-msg d-none">
+                🎉 The journey has begun! Congratulations, Engineer! 🎉
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- MESSAGES PREVIEW -->
+@if (Model.RecentMessages.Any())
+{
+    <section class="messages-preview-section py-5">
+        <div class="container">
+            <div class="section-header text-center mb-5" data-aos="fade-up">
+                <div class="section-eyebrow">Words of Love</div>
+                <h2 class="section-title">Recent Messages</h2>
+                <p class="section-subtitle">Heartfelt words from friends and family</p>
+            </div>
+
+            <div class="messages-masonry" id="messagesGrid">
+                @foreach (var message in Model.RecentMessages)
+                {
+                    <div class="message-card" data-aos="fade-up" data-aos-delay="@(Model.RecentMessages.ToList().IndexOf(message) * 100)">
+                        <div class="message-reaction">@message.ReactionType</div>
+                        <div class="message-content">@message.Content</div>
+                        @if (!string.IsNullOrEmpty(message.ImageUrl))
+                        {
+                            <img src="@message.ImageUrl" alt="Message image" class="message-img">
+                        }
+                        <div class="message-footer">
+                            <div class="message-sender">
+                                <div class="sender-avatar">@message.SenderName[0].ToString().ToUpper()</div>
+                                <span>@message.SenderName</span>
+                            </div>
+                            <div class="message-date">@message.CreatedAt.ToString("MMM dd")</div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="text-center mt-5" data-aos="fade-up">
+                <a asp-controller="Messages" asp-action="Index" class="btn btn-outline-gold">
+                    View All Messages <i class="fas fa-arrow-right ms-2"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+}
+
+<!-- MEMORIES PREVIEW -->
+@if (Model.RecentMemories.Any())
+{
+    <section class="memories-preview-section py-5">
+        <div class="container">
+            <div class="section-header text-center mb-5" data-aos="fade-up">
+                <div class="section-eyebrow">Captured Moments</div>
+                <h2 class="section-title">Memories</h2>
+                <p class="section-subtitle">A glimpse into the journey</p>
+            </div>
+
+            <div class="row g-4">
+                @foreach (var memory in Model.RecentMemories)
+                {
+                    <div class="col-md-6 col-lg-3" data-aos="zoom-in" data-aos-delay="@(Model.RecentMemories.ToList().IndexOf(memory) * 100)">
+                        <div class="memory-card">
+                            <div class="memory-img-wrap">
+                                @if (!string.IsNullOrEmpty(memory.ImageUrl))
+                                {
+                                    <img src="@memory.ImageUrl" alt="@memory.Title" class="memory-img">
+                                }
+                                else
+                                {
+                                    <div class="memory-img-placeholder">
+                                        <i class="fas fa-image"></i>
+                                    </div>
+                                }
+                                <div class="memory-overlay">
+                                    <p class="memory-desc">@memory.Description</p>
+                                </div>
+                            </div>
+                            <div class="memory-body">
+                                <h5 class="memory-title">@memory.Title</h5>
+                                <span class="memory-date">@memory.CreatedAt.ToString("MMMM yyyy")</span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="text-center mt-5" data-aos="fade-up">
+                <a asp-controller="Memories" asp-action="Index" class="btn btn-outline-gold">
+                    View Full Gallery <i class="fas fa-images ms-2"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+}
+
+<!-- CALL TO ACTION -->
+<section class="cta-section py-5">
+    <div class="container">
+        <div class="cta-card" data-aos="zoom-in">
+            <div class="cta-decoration cta-deco-1">🎓</div>
+            <div class="cta-decoration cta-deco-2">🎓</div>
+            <div class="cta-icon">🖋️</div>
+            <h2 class="cta-title">Leave Your Mark</h2>
+            <p class="cta-text">
+                Share your congratulations, memories, and wishes for <strong>Eng. Mohammed Abu-Issa</strong>.
+                Your words will be treasured forever in this digital graduation book.
+            </p>
+            <div class="cta-actions">
+                <a asp-controller="Messages" asp-action="Create" class="btn btn-gold btn-lg me-3">
+                    <i class="fas fa-pen-nib me-2"></i> Write a Message
+                </a>
+                <div class="cta-share">
+                    <span class="cta-share-label">Share this page:</span>
+                    <a href="https://www.instagram.com/mo_ahmad25?igsh=MXQ0MHphNjBjdmY2Nw%3D%3D&utm_source=qr" target="_blank" class="social-btn instagram">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+
+                    <a href="#" onclick="copyLink()" class="social-btn copy">
+                        <i class="fas fa-link"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        // Countdown Timer
+        const gradDate = new Date('Jul 22, 2026 00:00:00').getTime();
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const diff = gradDate - now;
+            if (diff <= 0) {
+                document.getElementById('countdown').classList.add('d-none');
+                document.getElementById('countdownMessage').classList.remove('d-none');
+                return;
+            }
+            document.getElementById('days').textContent = String(Math.floor(diff / (1000*60*60*24))).padStart(2,'0');
+            document.getElementById('hours').textContent = String(Math.floor((diff%(1000*60*60*24))/(1000*60*60))).padStart(2,'0');
+            document.getElementById('minutes').textContent = String(Math.floor((diff%(1000*60*60))/(1000*60))).padStart(2,'0');
+            document.getElementById('seconds').textContent = String(Math.floor((diff%(1000*60))/1000)).padStart(2,'0');
+        }
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+
+        // Animated counters
+        document.querySelectorAll('.stat-number').forEach(el => {
+            const target = parseInt(el.dataset.target);
+            let current = 0;
+            const step = Math.ceil(target / 50);
+            const timer = setInterval(() => {
+                current = Math.min(current + step, target);
+                el.textContent = current;
+                if (current >= target) clearInterval(timer);
+            }, 30);
+        });
+    </script>
+}

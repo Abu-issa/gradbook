@@ -1,0 +1,35 @@
+@{
+    ViewData["Title"] = "Thank You!";
+    Layout = "_Layout";
+}
+
+<section class="thanks-section">
+    <div class="container text-center">
+        <div class="thanks-content" data-aos="zoom-in">
+            <div class="thanks-icon">🎓</div>
+            <h1 class="thanks-title">Message Submitted!</h1>
+            <p class="thanks-text">
+                Thank you for your heartfelt message. It will be reviewed and published on the wall soon.
+                <strong>Eng. Mohammed Abu-Issa</strong> will cherish your words forever.
+            </p>
+            <div class="thanks-confetti">✦ ✦ ✦</div>
+            <div class="thanks-actions">
+                <a asp-controller="Messages" asp-action="Index" class="btn btn-gold me-3">
+                    <i class="fas fa-comments me-2"></i> View Message Wall
+                </a>
+                <a asp-controller="Home" asp-action="Index" class="btn btn-ghost">
+                    <i class="fas fa-home me-2"></i> Back to Home
+                </a>
+            </div>
+            <div class="thanks-share mt-4">
+                <p class="text-muted mb-2">Share this graduation page with others:</p>
+                <a href="https://wa.me/?text=Congratulate%20Eng.%20Mohammed%20Abu-Issa!%20" target="_blank" class="social-btn whatsapp me-2">
+                    <i class="fab fa-whatsapp"></i> WhatsApp
+                </a>
+                <button onclick="copyLink()" class="social-btn copy">
+                    <i class="fas fa-link"></i> Copy Link
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
