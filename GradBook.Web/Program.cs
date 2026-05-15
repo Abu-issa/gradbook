@@ -16,9 +16,16 @@ string connectionString;
 
 if (!string.IsNullOrEmpty(databaseUrl))
 {
-    // Npgsql يمكنه قراءة رابط postgres:// مباشرة إذا قمت بتحويله 
-    // أو استخدم الطريقة الأكثر أماناً لبناء السلسلة
-    connectionString = databaseUrl;
+    // Railway يعطي الرابط بصيغة postgresql:// 
+    // مكتبة Npgsql تتوقع postgres:// أو تنسيق Key=Value
+    // هذا السطر سيقوم بتحويل الرابط للصيغة الصحيحة
+    connectionString = databaseUrl.Replace("postgresql://", "postgres://");
+
+    // ملاحظة اختيارية: إذا استمر الخطأ، يفضل إضافة SSL Mode
+    if (!connectionString.Contains("SSL Mode"))
+    {
+        connectionString += ";SSL Mode=Require;Trust Server Certificate=true";
+    }
 }
 else
 {
@@ -27,7 +34,6 @@ else
 
 builder.Services.AddDbContext<GradBookDbContext>(options =>
     options.UseNpgsql(connectionString));
-
 // Application Services
 builder.Services.AddScoped<IMessageService, MessageService>();
 builder.Services.AddScoped<IMemoryService, MemoryService>();
