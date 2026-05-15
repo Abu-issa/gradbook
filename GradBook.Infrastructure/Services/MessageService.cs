@@ -3,15 +3,18 @@ using GradBook.Domain.Entities;
 using GradBook.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
+
 namespace GradBook.Infrastructure.Services;
 
 public class MessageService : IMessageService
 {
+    private readonly CloudinaryService _cloudinary;
     private readonly GradBookDbContext _context;
 
-    public MessageService(GradBookDbContext context)
+    public MessageService(GradBookDbContext context, CloudinaryService cloudinary )
     {
         _context = context;
+        _cloudinary = cloudinary;
     }
 
     public async Task<IEnumerable<Message>> GetAllMessagesAsync()

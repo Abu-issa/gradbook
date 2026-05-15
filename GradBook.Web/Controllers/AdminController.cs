@@ -1,5 +1,6 @@
 using GradBook.Application.Interfaces;
 using GradBook.Domain.Entities;
+using GradBook.Infrastructure.Services;
 using GradBook.Web.Hubs;
 using GradBook.Web.ViewModels;
 using Microsoft.AspNetCore.Authentication;
@@ -18,18 +19,18 @@ public class AdminController : Controller
     private readonly IVisitorService _visitorService;
     private readonly IHubContext<MessageHub> _hubContext;
     private readonly IConfiguration _config;
-    private readonly IWebHostEnvironment _environment;
+    private readonly CloudinaryService _cloudinary;
 
     public AdminController(IMessageService messageService, IMemoryService memoryService,
         IVisitorService visitorService, IHubContext<MessageHub> hubContext,
-        IConfiguration config, IWebHostEnvironment environment)
+        IConfiguration config, CloudinaryService cloudinary)
     {
         _messageService = messageService;
         _memoryService = memoryService;
         _visitorService = visitorService;
         _hubContext = hubContext;
         _config = config;
-        _environment = environment;
+        _cloudinary = cloudinary;
     }
 
     public IActionResult Login() => View(new AdminLoginViewModel());
@@ -137,14 +138,7 @@ public class AdminController : Controller
         string? imageUrl = null;
         if (vm.Image != null && vm.Image.Length > 0)
         {
-            var uploadsPath = Path.Combine(_environment.WebRootPath, "uploads");
-            Directory.CreateDirectory(uploadsPath);
-            var ext = Path.GetExtension(vm.Image.FileName).ToLowerInvariant();
-            var fileName = $"{Guid.NewGuid()}{ext}";
-            var filePath = Path.Combine(uploadsPath, fileName);
-            using var stream = new FileStream(filePath, FileMode.Create);
-            await vm.Image.CopyToAsync(stream);
-            imageUrl = $"/uploads/{fileName}";
+            imageUrl = await _cloudinary.UploadImageAsync(vm.Image);
         }
 
         await _memoryService.CreateMemoryAsync(new Memory
