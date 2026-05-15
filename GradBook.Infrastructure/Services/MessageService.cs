@@ -8,13 +8,11 @@ namespace GradBook.Infrastructure.Services;
 
 public class MessageService : IMessageService
 {
-    private readonly CloudinaryService _cloudinary;
     private readonly GradBookDbContext _context;
 
-    public MessageService(GradBookDbContext context, CloudinaryService cloudinary )
+    public MessageService(GradBookDbContext context)
     {
         _context = context;
-        _cloudinary = cloudinary;
     }
 
     public async Task<IEnumerable<Message>> GetAllMessagesAsync()

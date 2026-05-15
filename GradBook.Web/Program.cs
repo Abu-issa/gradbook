@@ -41,6 +41,7 @@ builder.Services.AddDbContext<GradBookDbContext>(options =>
 builder.Services.AddScoped<IMessageService, MessageService>();
 builder.Services.AddScoped<IMemoryService, MemoryService>();
 builder.Services.AddScoped<IVisitorService, VisitorService>();
+builder.Services.AddSingleton<CloudinaryService>();
 
 // Authentication
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

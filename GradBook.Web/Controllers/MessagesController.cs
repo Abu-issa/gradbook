@@ -1,5 +1,6 @@
 using GradBook.Application.Interfaces;
 using GradBook.Domain.Entities;
+using GradBook.Infrastructure.Services;
 using GradBook.Web.Hubs;
 using GradBook.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
@@ -12,13 +13,15 @@ public class MessagesController : Controller
     private readonly IMessageService _messageService;
     private readonly IHubContext<MessageHub> _hubContext;
     private readonly IWebHostEnvironment _environment;
+    private readonly CloudinaryService _cloudinary;
 
     public MessagesController(IMessageService messageService, IHubContext<MessageHub> hubContext,
-        IWebHostEnvironment environment)
+        IWebHostEnvironment environment, CloudinaryService cloudinary)
     {
         _messageService = messageService;
         _hubContext = hubContext;
         _environment = environment;
+        _cloudinary = cloudinary;       
     }
 
     public async Task<IActionResult> Index()
@@ -31,11 +34,12 @@ public class MessagesController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    
     public async Task<IActionResult> Create(CreateMessageViewModel vm)
     {
-        if (!ModelState.IsValid)
-            return View(vm);
+        if (!ModelState.IsValid) return View(vm);
 
+        // ← احذف كود الـ uploads القديم واستبدله بهاد
         string? imageUrl = null;
         if (vm.Image != null && vm.Image.Length > 0)
         {
@@ -46,14 +50,7 @@ public class MessagesController : Controller
                 ModelState.AddModelError("Image", "Only image files are allowed.");
                 return View(vm);
             }
-
-            var uploadsPath = Path.Combine(_environment.WebRootPath, "uploads");
-            Directory.CreateDirectory(uploadsPath);
-            var fileName = $"{Guid.NewGuid()}{ext}";
-            var filePath = Path.Combine(uploadsPath, fileName);
-            using var stream = new FileStream(filePath, FileMode.Create);
-            await vm.Image.CopyToAsync(stream);
-            imageUrl = $"/uploads/{fileName}";
+            imageUrl = await _cloudinary.UploadImageAsync(vm.Image);
         }
 
         var message = new Message
@@ -64,10 +61,8 @@ public class MessagesController : Controller
             ImageUrl = imageUrl,
             IsApproved = false
         };
-
         await _messageService.CreateMessageAsync(message);
-
-        TempData["Success"] = "Your message has been submitted and is awaiting approval. Thank you! 🎓";
+        TempData["Success"] = "Your message has been submitted! 🎓";
         return RedirectToAction("Thanks");
     }
 
