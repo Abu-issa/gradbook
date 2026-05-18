@@ -666,7 +666,6 @@ body {
     background: var(--black-5);
     margin-bottom: 1rem;
 }
-/* خلفية الدفتر لصفحة الـ Message Wall */
 .page-hero.mini-hero {
     min-height: 100vh;
     display: flex;
@@ -693,7 +692,7 @@ body {
     background: linear-gradient( to bottom, rgba(0,0,0,0.7), rgba(0,0,0,0.5) );
 }
 
-    /* إضافة لمسة فنية اختيارية: تفتيح النص ليظهر فوق الدفتر */
+    
     .page-hero.mini-hero .page-title {
         text-shadow: 0 4px 15px rgba(0,0,0,0.8);
         color: var(--gold-light);
