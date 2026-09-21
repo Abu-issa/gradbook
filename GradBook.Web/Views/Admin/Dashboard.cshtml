@@ -1,136 +1,94 @@
 @model AdminDashboardViewModel
-@{
-    ViewData["Title"] = "Dashboard";
-    Layout = "_AdminLayout";
-}
-
-<!-- Stats Cards -->
-<div class="row g-4 mb-4">
-    <div class="col-sm-6 col-xl-3">
-        <div class="stat-card stat-gold">
-            <div class="stat-icon"><i class="fas fa-envelope"></i></div>
-            <div class="stat-info">
-                <div class="stat-value">@Model.TotalMessages</div>
-                <div class="stat-label">Total Messages</div>
-            </div>
-        </div>
+@{ ViewData["Title"] = "Overview"; Layout = "_AdminLayout"; }
+<div class="admin-heading">
+    <div>
+        <span class="eyebrow">A LITTLE CARE FOR EVERY MEMORY</span>
+        <h1>Your chapter,<br />
+            <em>beautifully kept.</em>
+        </h1>
+        <p>Welcome back. Here’s what’s happening in the book.</p>
     </div>
-    <div class="col-sm-6 col-xl-3">
-        <div class="stat-card stat-orange">
-            <div class="stat-icon"><i class="fas fa-clock"></i></div>
-            <div class="stat-info">
-                <div class="stat-value">@Model.PendingMessages</div>
-                <div class="stat-label">Pending Approval</div>
-            </div>
-        </div>
+    <a class="button button-gold" asp-action="CreateMemory">Add a memory ↗</a>
+</div>
+<div class="metric-grid">
+    <div class="metric">
+        <span>Total messages</span>
+        <strong>@Model.TotalMessages.ToString("D2")</strong>
+        <small>Words from your people</small>
+        <span class="metric-icon" aria-hidden="true">↗</span>
     </div>
-    <div class="col-sm-6 col-xl-3">
-        <div class="stat-card stat-blue">
-            <div class="stat-icon"><i class="fas fa-users"></i></div>
-            <div class="stat-info">
-                <div class="stat-value">@Model.TotalVisitors</div>
-                <div class="stat-label">Total Visitors</div>
-            </div>
-        </div>
+    <div class="metric metric-accent">
+        <span>Awaiting your review</span>
+        <strong>@Model.PendingMessages.ToString("D2")</strong>
+        <a asp-action="Messages">Open message desk →</a>
     </div>
-    <div class="col-sm-6 col-xl-3">
-        <div class="stat-card stat-green">
-            <div class="stat-icon"><i class="fas fa-images"></i></div>
-            <div class="stat-info">
-                <div class="stat-value">@Model.TotalMemories</div>
-                <div class="stat-label">Memories</div>
-            </div>
-        </div>
+    <div class="metric">
+        <span>Visits to the story</span>
+        <strong>@Model.TotalVisitors.ToString("D2")</strong>
+        <small>@Model.TodayVisitors today</small>
+    </div>
+    <div class="metric">
+        <span>Memories preserved</span>
+        <strong>@Model.TotalMemories.ToString("D2")</strong>
+        <a asp-action="Memories">Explore the journal →</a>
     </div>
 </div>
-
-<div class="row g-4">
-    <!-- Pending Messages -->
-    <div class="col-lg-8">
-        <div class="admin-card">
-            <div class="admin-card-header">
-                <h5><i class="fas fa-clock me-2 text-warning"></i> Pending Approval</h5>
-                <a asp-action="Messages" class="btn btn-sm btn-outline-gold">View All</a>
+<div class="dashboard-grid">
+    <section class="workspace-panel">
+        <div class="panel-heading">
+            <div>
+                <span class="eyebrow">THE INBOX</span>
+                <h2>A few words waiting.</h2>
             </div>
-            @if (!Model.PendingMessagesList.Any())
-            {
-                <div class="empty-admin text-center py-4">
-                    <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
-                    <p class="mb-0">No pending messages. All caught up!</p>
+            <a class="text-link" asp-action="Messages">View all ↗</a>
+        </div>
+        @if (!Model.PendingMessagesList.Any()) {
+        <div class="admin-empty">
+            <span aria-hidden="true">✓</span>
+            <h3>All caught up.</h3>
+            <p>Every message has found its place.</p>
+        </div>
+        }
+        else {
+        <div class="pending-list">
+            @foreach (var msg in Model.PendingMessagesList.Take(5)) {
+            <article class="pending-entry">
+                <div class="pending-meta">
+                    <strong dir="auto">@msg.SenderName</strong>
+                    <time>@msg.CreatedAt.ToString("MMM dd, yyyy")</time>
+                    <span>@msg.ReactionType</span>
                 </div>
-            }
-            else
-            {
-                <div class="pending-list">
-                    @foreach (var msg in Model.PendingMessagesList.Take(5))
-                    {
-                        <div class="pending-item">
-                            <div class="pending-reaction">@msg.ReactionType</div>
-                            <div class="pending-body">
-                                <div class="pending-sender">@msg.SenderName</div>
-                                <div class="pending-content">@(msg.Content.Length > 100 ? msg.Content[..100] + "..." : msg.Content)</div>
-                                <div class="pending-date">@msg.CreatedAt.ToString("MMM dd, yyyy HH:mm")</div>
-                            </div>
-                            <div class="pending-actions">
-                                <form asp-action="ApproveMessage" method="post" class="d-inline">
-                                    <input type="hidden" name="id" value="@msg.Id">
-                                    @Html.AntiForgeryToken()
-                                    <button type="submit" class="btn btn-sm btn-success" title="Approve">
-                                        <i class="fas fa-check"></i>
-                                    </button>
-                                </form>
-                                <form asp-action="DeleteMessage" method="post" class="d-inline">
-                                    <input type="hidden" name="id" value="@msg.Id">
-                                    @Html.AntiForgeryToken()
-                                    <button type="submit" class="btn btn-sm btn-danger" title="Delete"
-                                            onclick="return confirm('Delete this message?')">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
+                <details class="message-details">
+                    <summary>@(msg.Content.Length > 110 ? msg.Content[..110] + "…" : msg.Content)<span>Read full message ↗</span>
+                    </summary>
+                    <p dir="auto">@msg.Content</p>
+                    @if (!string.IsNullOrEmpty(msg.ImageUrl)) {
+                    <button type="button" class="review-image image-trigger" data-image="@msg.ImageUrl" data-title="Photo from @msg.SenderName">
+                        <img src="@msg.ImageUrl" alt="Photo from @msg.SenderName" />View photograph ↗</button>
                     }
-                </div>
+                </details>
+                <partial name="_ModerationActions" model="msg" />
+            </article>
             }
         </div>
-    </div>
-
-    <!-- Quick Actions & Info -->
-    <div class="col-lg-4">
-        <div class="admin-card mb-4">
-            <div class="admin-card-header">
-                <h5><i class="fas fa-bolt me-2 text-gold"></i> Quick Actions</h5>
-            </div>
-            <div class="quick-actions">
-                <a asp-action="Messages" class="quick-action-btn">
-                    <i class="fas fa-envelope-open"></i>
-                    <span>Manage Messages</span>
-                </a>
-                <a asp-action="Memories" class="quick-action-btn">
-                    <i class="fas fa-images"></i>
-                    <span>Manage Memories</span>
-                </a>
-                <a asp-action="CreateMemory" class="quick-action-btn">
-                    <i class="fas fa-plus-circle"></i>
-                    <span>Add Memory</span>
-                </a>
-                <a asp-action="QrCode" class="quick-action-btn">
-                    <i class="fas fa-qrcode"></i>
-                    <span>QR Code</span>
-                </a>
-            </div>
+        }
+    </section>
+    <aside class="desk-aside">
+        <div class="desk-note">
+            <span class="eyebrow">FROM THE EDITOR’S DESK</span>
+            <span class="desk-star" aria-hidden="true">🎓</span>
+            <h2>Good memories<br />deserve <em>a home.</em>
+            </h2>
+            <p>Add the photographs that tell your story. The big days and the little moments alike.</p>
+            <a class="text-link" asp-action="CreateMemory">Add to the journal ↗</a>
         </div>
-
-        <div class="admin-card">
-            <div class="admin-card-header">
-                <h5><i class="fas fa-chart-bar me-2 text-gold"></i> Today</h5>
+        <a class="share-panel" asp-action="QrCode">
+            <span aria-hidden="true">⊞</span>
+            <div>
+                <strong>Bring everyone into the story</strong>
+                <p>Your link & graduation QR code</p>
             </div>
-            <div class="today-stats">
-                <div class="today-stat">
-                    <i class="fas fa-user-plus text-gold"></i>
-                    <span>@Model.TodayVisitors visitors today</span>
-                </div>
-            </div>
-        </div>
-    </div>
+            <span aria-hidden="true">↗</span>
+        </a>
+    </aside>
 </div>

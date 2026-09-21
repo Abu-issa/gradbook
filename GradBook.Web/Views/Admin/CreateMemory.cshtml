@@ -1,55 +1,62 @@
 @model CreateMemoryViewModel
-@{
-    ViewData["Title"] = "Add Memory";
-    Layout = "_AdminLayout";
-}
-
-<div class="row justify-content-center">
-    <div class="col-lg-7">
-        <div class="admin-card">
-            <form asp-action="CreateMemory" method="post" enctype="multipart/form-data">
-                @Html.AntiForgeryToken()
-
-                <div class="mb-3">
-                    <label asp-for="Title" class="form-label">Title *</label>
-                    <input asp-for="Title" class="form-control" placeholder="e.g., Graduation Ceremony">
-                    <span asp-validation-for="Title" class="text-danger small"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="Description" class="form-label">Description</label>
-                    <textarea asp-for="Description" class="form-control" rows="3"
-                              placeholder="Brief description of this memory..."></textarea>
-                    <span asp-validation-for="Description" class="text-danger small"></span>
-                </div>
-
-                <div class="mb-4">
-                    <label asp-for="Image" class="form-label">Photo</label>
-                    <input asp-for="Image" type="file" accept="image/*" class="form-control" onchange="previewImg(this)">
-                    <img id="imgPrev" src="" alt="" class="mt-2 rounded" style="max-height:200px;display:none">
-                </div>
-
-                <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-gold">
-                        <i class="fas fa-save me-2"></i> Save Memory
-                    </button>
-                    <a asp-action="Memories" class="btn btn-outline-secondary">Cancel</a>
-                </div>
-            </form>
-        </div>
+@{ ViewData["Title"] = "Add a memory"; Layout = "_AdminLayout"; }
+<div class="admin-heading">
+    <div>
+        <a class="back-link" asp-action="Memories">← Photo journal</a>
+        <h1>A moment to <em>keep.</em>
+        </h1>
+        <p>Give a photograph a place in the story.</p>
     </div>
 </div>
-
+<div class="admin-compose">
+    <section class="workspace-panel padded-panel">
+        <form asp-action="CreateMemory" method="post" enctype="multipart/form-data" data-loading-form>@Html.AntiForgeryToken()<div asp-validation-summary="All" class="validation-summary" role="alert"></div>
+            <div class="field">
+                <label asp-for="Title">Memory title <span>Required</span>
+                </label>
+                <input asp-for="Title" maxlength="200" required placeholder="A day we’ll never forget" />
+                <span asp-validation-for="Title" class="field-error"></span>
+            </div>
+            <div class="field">
+                <label asp-for="Description">The story behind it <span>Optional</span>
+                </label>
+                <textarea asp-for="Description" rows="5" maxlength="1000" placeholder="The people, the place, the feeling…"></textarea>
+                <span asp-validation-for="Description" class="field-error"></span>
+            </div>
+            <div class="field">
+                <label asp-for="Image">Photograph <span>Optional</span>
+                </label>
+                <div class="upload-zone" data-upload>
+                    <input asp-for="Image" type="file" accept="image/*" />
+                    <div class="upload-prompt">
+                        <span class="upload-icon" aria-hidden="true">↥</span>
+                        <strong>Choose a photograph</strong>
+                        <small>Browse or drop an image here</small>
+                    </div>
+                    <div class="upload-preview" hidden>
+                        <img alt="Selected memory preview" />
+                        <span class="upload-filename"></span>
+                    </div>
+                    <button type="button" class="upload-remove" hidden aria-label="Remove selected photograph">✕</button>
+                </div>
+                <span asp-validation-for="Image" class="field-error"></span>
+                <span class="field-error" data-upload-error role="alert"></span>
+            </div>
+            <div class="form-actions">
+                <a class="back-link" asp-action="Memories">Cancel</a>
+                <button class="button button-gold" type="submit" data-loading-label="Saving your memory…">Save memory ↗</button>
+            </div>
+        </form>
+    </section>
+    <aside class="form-editor-note">
+        <span class="eyebrow">A NOTE ON THE JOURNAL</span>
+        <h2>The little things<br />are <em>the big things.</em>
+        </h2>
+        <p>Choose a clear photograph and give it a meaningful title. A short caption can bring the moment back to life.</p>
+        <span class="fine-line"></span>
+        <p>Saved memories appear in the public gallery.</p>
+    </aside>
+</div>
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-    <script>
-        function previewImg(input) {
-            const img = document.getElementById('imgPrev');
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = e => { img.src = e.target.result; img.style.display = 'block'; };
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-    </script>
+<partial name="_ValidationScriptsPartial" />
 }

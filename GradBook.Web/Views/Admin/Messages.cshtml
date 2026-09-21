@@ -1,102 +1,82 @@
-@model IEnumerable<GradBook.Domain.Entities.Message>
-@{
-    ViewData["Title"] = "Manage Messages";
-    Layout = "_AdminLayout";
-}
-
-<div class="admin-card">
-    <div class="admin-card-header mb-3">
-        <h5><i class="fas fa-envelope me-2 text-gold"></i> All Messages (@Model.Count())</h5>
-        <div class="d-flex gap-2">
-            <button class="btn btn-sm btn-outline-secondary" onclick="filterMessages('all')">All</button>
-            <button class="btn btn-sm btn-outline-warning" onclick="filterMessages('pending')">Pending</button>
-            <button class="btn btn-sm btn-outline-success" onclick="filterMessages('approved')">Approved</button>
-        </div>
+@model IEnumerable<Message>
+@{ ViewData["Title"] = "Messages"; Layout = "_AdminLayout"; }
+<div class="admin-heading">
+    <div>
+        <span class="eyebrow">THE MESSAGE DESK</span>
+        <h1>Words worth <em>keeping.</em>
+        </h1>
+        <p>Read every note. Publish the love. Keep the story yours.</p>
     </div>
-
-    @if (!Model.Any())
-    {
-        <div class="empty-admin text-center py-5">
-            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-            <p>No messages yet.</p>
-        </div>
-    }
-    else
-    {
-        <div class="table-responsive">
-            <table class="table admin-table">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Sender</th>
-                        <th>Message</th>
-                        <th>Reaction</th>
-                        <th>Date</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var msg in Model)
-                    {
-                        <tr class="msg-row @(msg.IsApproved ? "approved" : "pending")">
-                            <td>@msg.Id</td>
-                            <td><strong>@msg.SenderName</strong></td>
-                            <td>
-                                <span title="@msg.Content">@(msg.Content.Length > 80 ? msg.Content[..80] + "…" : msg.Content)</span>
-                                @if (!string.IsNullOrEmpty(msg.ImageUrl))
-                                {
-                                    <img src="@msg.ImageUrl" class="msg-thumb ms-2" alt="">
-                                }
-                            </td>
-                            <td class="text-center">@msg.ReactionType</td>
-                            <td>@msg.CreatedAt.ToString("MMM dd, yyyy")</td>
-                            <td>
-                                @if (msg.IsApproved)
-                                {
-                                    <span class="badge bg-success">Approved</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-warning text-dark">Pending</span>
-                                }
-                            </td>
-                            <td>
-                                @if (!msg.IsApproved)
-                                {
-                                    <form asp-action="ApproveMessage" method="post" class="d-inline">
-                                        <input type="hidden" name="id" value="@msg.Id">
-                                        @Html.AntiForgeryToken()
-                                        <button type="submit" class="btn btn-sm btn-success" title="Approve">
-                                            <i class="fas fa-check"></i>
-                                        </button>
-                                    </form>
-                                }
-                                <form asp-action="DeleteMessage" method="post" class="d-inline">
-                                    <input type="hidden" name="id" value="@msg.Id">
-                                    @Html.AntiForgeryToken()
-                                    <button type="submit" class="btn btn-sm btn-danger" title="Delete"
-                                            onclick="return confirm('Are you sure you want to delete this message?')">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    }
+    <span class="collection-total">@Model.Count().ToString("D2") <small>messages</small>
+    </span>
 </div>
-
-@section Scripts {
-    <script>
-        function filterMessages(status) {
-            document.querySelectorAll('.msg-row').forEach(row => {
-                if (status === 'all') row.style.display = '';
-                else if (status === 'approved') row.style.display = row.classList.contains('approved') ? '' : 'none';
-                else if (status === 'pending') row.style.display = row.classList.contains('pending') ? '' : 'none';
-            });
-        }
-    </script>
-}
+<section class="workspace-panel">
+    <div class="message-toolbar">
+        <div class="filter-tabs" role="group" aria-label="Filter messages">
+            <button type="button" data-filter="all" aria-pressed="true">All <span>@Model.Count()</span>
+            </button>
+            <button type="button" data-filter="pending" aria-pressed="false">Pending <span>@Model.Count(m => !m.IsApproved)</span>
+            </button>
+            <button type="button" data-filter="approved" aria-pressed="false">Approved <span>@Model.Count(m => m.IsApproved)</span>
+            </button>
+        </div>
+        <label class="search-field">
+            <span class="sr-only">Search messages</span>
+            <input type="search" id="messageSearch" placeholder="Search a name or message…" />
+            <span aria-hidden="true">⌕</span>
+        </label>
+    </div>
+    <div class="table-scroll">
+        <table class="message-table">
+            <caption class="sr-only">Submitted messages with moderation actions</caption>
+            <thead>
+                <tr>
+                    <th scope="col">From</th>
+                    <th scope="col">Their words</th>
+                    <th scope="col">Received</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var msg in Model) {
+                <tr data-message-row data-status="@(msg.IsApproved ? "approved" : "pending")">
+                    <td data-label="From">
+                        <strong dir="auto">@msg.SenderName</strong>
+                        <span class="table-id">NOTE #@msg.Id · @msg.ReactionType</span>
+                    </td>
+                    <td data-label="Their words">
+                        <details class="message-details">
+                            <summary>@(msg.Content.Length > 90 ? msg.Content[..90] + "…" : msg.Content)<span>Read full message ↗</span>
+                            </summary>
+                            <p dir="auto">@msg.Content</p>
+                            @if (!string.IsNullOrEmpty(msg.ImageUrl)) {
+                            <button class="review-image image-trigger" type="button" data-image="@msg.ImageUrl" data-title="Photo from @msg.SenderName">
+                                <img src="@msg.ImageUrl" alt="Photo from @msg.SenderName" loading="lazy" />View photograph ↗</button>
+                            }
+                        </details>
+                    </td>
+                    <td data-label="Received">
+                        <time>@msg.CreatedAt.ToString("MMM dd, yyyy")</time>
+                    </td>
+                    <td data-label="Status">
+                        <span class="status-badge @(msg.IsApproved ? "approved" : "pending")">@(msg.IsApproved ? "Published" : "Pending")</span>
+                    </td>
+                    <td data-label="Actions">
+                        <partial name="_ModerationActions" model="msg" />
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="admin-empty" id="filteredEmpty" hidden="@Model.Any()">
+        <span aria-hidden="true">“</span>
+        <h2>No messages here yet.</h2>
+        <p>New notes will appear here, ready for your review.</p>
+    </div>
+    <div class="table-bottom">
+        <span id="filteredCount" role="status">@Model.Count() messages</span>
+        <span>Thoughtfully moderated. Personally kept.</span>
+    </div>
+</section>

@@ -1,44 +1,42 @@
-@{
-    ViewData["Title"] = "QR Code";
-    Layout = "_AdminLayout";
-}
-
-<div class="row justify-content-center">
-    <div class="col-md-6 text-center">
-        <div class="admin-card p-4">
-            <h5 class="mb-3"><i class="fas fa-qrcode me-2 text-gold"></i> Graduation QR Code</h5>
-            <p class="text-muted mb-4">
-                Print this QR code on graduation tables so guests can scan and leave messages instantly.
-            </p>
-            <div class="qr-container">
-                <div id="qrcode" class="mx-auto" style="width:220px;height:220px;background:#fff;display:flex;align-items:center;justify-content:center;border:3px solid #C9A84C;border-radius:12px;">
-                    <div class="text-center p-3">
-                        <div style="font-size:64px">🔳</div>
-                        <p class="text-muted small mt-2">QR Code renders here<br>with your site URL</p>
-                    </div>
-                </div>
-            </div>
-            <div class="mt-4">
-                <p class="text-muted small">Current URL: <strong id="siteUrl"></strong></p>
-                <button onclick="copyLink()" class="btn btn-gold mt-2">
-                    <i class="fas fa-copy me-2"></i> Copy Site Link
-                </button>
-            </div>
-        </div>
+@{ ViewData["Title"] = "Share & QR code"; Layout = "_AdminLayout"; }
+<div class="admin-heading">
+    <div>
+        <span class="eyebrow">AN OPEN INVITATION</span>
+        <h1>Bring them <em>into the story.</em>
+        </h1>
+        <p>On the table. In an invitation. One scan brings everyone here.</p>
     </div>
 </div>
-
+<div class="qr-layout">
+    <section class="qr-print-card" id="qrPrintCard">
+        <span class="eyebrow">THE GRADUATION OF</span>
+        <h2>Mohammed<br />
+            <em>Abu-Issa.</em>
+        </h2>
+        <div id="qrcode" class="qr-code" role="img" aria-label="QR code linking to the graduation website">
+            <span id="qrStatus" role="status">Preparing your invitation…</span>
+        </div>
+        <p>Scan. Leave a little love.<br />Become part of the story.</p>
+        <span class="eyebrow">CLASS OF 2026 · GRADBOOK</span>
+    </section>
+    <aside class="qr-options">
+        <span class="eyebrow">A CHAPTER TO SHARE</span>
+        <h2>One little square.<br />
+            <em>So many connections.</em>
+        </h2>
+        <p>This code opens the public homepage, where guests can explore the memories and leave a message.</p>
+        <label class="field-label" for="siteUrl">Your site address</label>
+        <input id="siteUrl" class="share-url" readonly />
+        <div class="qr-actions">
+            <button class="button button-gold" data-copy-link type="button">Copy site link ↗</button>
+            <button class="button button-quiet" type="button" id="printQr" disabled>Print invitation ↗</button>
+        </div>
+        <p class="muted small-copy">Print from the deployed website so guests receive its public address.</p>
+    </aside>
+</div>
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
-    <script>
-        const url = window.location.origin;
-        document.getElementById('siteUrl').textContent = url;
-        document.getElementById('qrcode').innerHTML = '';
-        QRCode.toCanvas(document.createElement('canvas'), url, { width: 220, margin: 1, color: { dark: '#1a1a1a', light: '#ffffff' } }, function(err, canvas) {
-            if (!err) document.getElementById('qrcode').appendChild(canvas);
-        });
-        function copyLink() {
-            navigator.clipboard.writeText(url).then(() => alert('Link copied!'));
-        }
-    </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer>
+</script>
+<script src="~/js/qr.js" asp-append-version="true" defer>
+</script>
 }

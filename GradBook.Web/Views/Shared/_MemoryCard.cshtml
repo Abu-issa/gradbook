@@ -1,0 +1,26 @@
+@model Memory
+<figure class="journal-card">
+    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+    {
+    <button class="journal-image image-trigger" type="button" data-image="@Model.ImageUrl" data-title="@Model.Title" data-description="@Model.Description" aria-label="View @Model.Title">
+        <img src="@Model.ImageUrl" alt="@Model.Title" loading="lazy" />
+        <span class="image-expand" aria-hidden="true">↗</span>
+    </button>
+    }
+    else {
+    <div class="journal-image image-placeholder">
+        <span aria-hidden="true">◈</span>
+        <small>A memory in words</small>
+    </div>
+    }
+    <figcaption>
+        <div class="journal-meta">
+            <span class="eyebrow">THE ARCHIVE</span>
+            <time datetime="@Model.CreatedAt.ToString("yyyy-MM-dd")">@Model.CreatedAt.ToString("MMMM yyyy")</time>
+        </div>
+        <h3 dir="auto">@Model.Title</h3>
+        @if (!string.IsNullOrEmpty(Model.Description)) {
+        <p dir="auto">@Model.Description</p>
+        }
+    </figcaption>
+</figure>

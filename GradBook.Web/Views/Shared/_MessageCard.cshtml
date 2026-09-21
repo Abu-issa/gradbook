@@ -1,0 +1,23 @@
+@model Message
+<article class="note-card">
+    <div class="note-top">
+        <span class="eyebrow">WORDS TO KEEP</span>
+        <span class="note-reaction" aria-label="Reaction">@Model.ReactionType</span>
+    </div>
+    <blockquote class="note-content" dir="auto">@Model.Content</blockquote>
+    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+    {
+    <button type="button" class="note-image image-trigger" data-image="@Model.ImageUrl" data-title="A memory from @Model.SenderName" aria-label="View photo from @Model.SenderName">
+        <img src="@Model.ImageUrl" alt="Photo shared by @Model.SenderName" loading="lazy" />
+        <span aria-hidden="true">↗</span>
+    </button>
+    }
+    <footer class="note-footer">
+        <span class="sender-initial" aria-hidden="true">@(string.IsNullOrWhiteSpace(Model.SenderName) ? "·" : Model.SenderName[..1].ToUpper())</span>
+        <div>
+            <span class="sender-name" dir="auto">@Model.SenderName</span>
+            <time datetime="@Model.CreatedAt.ToString("yyyy-MM-dd")">@Model.CreatedAt.ToString("MMM dd, yyyy")</time>
+        </div>
+        <span class="note-sign" aria-hidden="true">↗</span>
+    </footer>
+</article>

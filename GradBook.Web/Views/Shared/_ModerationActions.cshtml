@@ -1,0 +1,12 @@
+@model Message
+<div class="moderation-actions">
+    @if (!Model.IsApproved) {
+    <form asp-controller="Admin" asp-action="ApproveMessage" method="post" data-loading-form>
+        <input type="hidden" name="id" value="@Model.Id" />@Html.AntiForgeryToken()<button type="submit" class="button button-approve" aria-label="Approve message from @Model.SenderName" data-loading-label="Approving…">✓ <span>Approve</span>
+        </button>
+    </form>
+    }
+    <form asp-controller="Admin" asp-action="DeleteMessage" method="post" data-delete-form data-delete-title="Delete this message?">
+        <input type="hidden" name="id" value="@Model.Id" />@Html.AntiForgeryToken()<button type="submit" class="button button-delete" aria-label="Delete message from @Model.SenderName">Delete</button>
+    </form>
+</div>
